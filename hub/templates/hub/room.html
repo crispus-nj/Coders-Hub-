@@ -16,19 +16,21 @@
                 <hr>
                 {% for message in room_messages %}
                     <div>
-                        {% if request.user == message.user %}
-                        <a type="button" href="{% url 'delete-message' message.id %}" class="btn btn-danger btn-sm">Delete</a>
-                        <br>
-                        {% endif %}
+                        
                         <small> <span class="text-primary">@: {{message.user.username}} </span> {{message.date_created|timesince}} ago</small>
                         <p>{{message.body}}</p>
+                        {% if request.user == message.user %}
+                        <small><a type="button" href="{% url 'delete-message' message.id %}">Edit</a></small>
+                        <small><a type="button" href="{% url 'delete-message' message.id %}"  class="text-danger">Delete</a></small>
+                        <br>
+                        {% endif %}
                         <hr>
                     </div>
                 {% endfor %}
             </div>
             {% if request.user.is_authenticated %}
                 <div class="comment-section">
-                    <form action="" method="POST" style="max-width: 350px; padding-left: 20px">
+                    <form action="" method="POST" style="max-width: 350px;">
                         {% csrf_token %}
                         <input type="text" name="body" id="body" placeholder="Write your message..." class="form-control">
                     </form>

@@ -38,10 +38,20 @@ def room(request, pk):
 
     context = {'pk':pk, 'room': room,'room_messages':room_messages, 'participants':participants}
     return render(request, 'hub/room.html', context)
-    
+
 @login_required(login_url='login')
 def delete_message(request, pk):
-    return render(request,'hub/delete.html')
+    message = Message.objects.get(pk=pk)
+    print("this is message", message)
+    if request.user != message.user:
+        return HttpResponse('You can not delete that message! Check your account and try again')
+    if request.method == 'POST':
+        message.delete()
+        return redirect('home')
+    return render(request,'hub/delete.html', {'object': message})
+
+def update_message(request):
+    return render(request, 'hub/room.html')
 
 @login_required(login_url='login')
 def create_room(request):
