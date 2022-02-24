@@ -19,13 +19,15 @@ def home(request):
                                  )
     topics = Topic.objects.all()
     room_count = rooms.count()
-    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count}
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-date_created')
+    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count, 'room_messages':room_messages}
     return render(request, 'hub/home.html', context)
 
 def room(request, pk):
     room = Room.objects.get(pk=pk)
     room_messages = room.message_set.all().order_by('-date_created')
     participants = room.participants.all()
+
     if request.method == 'POST':
         message = Message.objects.create(
             user = request.user,
@@ -49,9 +51,6 @@ def delete_message(request, pk):
         message.delete()
         return redirect('home')
     return render(request,'hub/delete.html', {'object': message})
-
-def update_message(request):
-    return render(request, 'hub/room.html')
 
 @login_required(login_url='login')
 def create_room(request):

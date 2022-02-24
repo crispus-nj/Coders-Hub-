@@ -20,7 +20,6 @@
                         <small> <span class="text-primary">@: {{message.user.username}} </span> {{message.date_created|timesince}} ago</small>
                         <p>{{message.body}}</p>
                         {% if request.user == message.user %}
-                        <small><a type="button" href="{% url 'delete-message' message.id %}">Edit</a></small>
                         <small><a type="button" href="{% url 'delete-message' message.id %}"  class="text-danger">Delete</a></small>
                         <br>
                         {% endif %}
