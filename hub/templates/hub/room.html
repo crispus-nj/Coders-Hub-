@@ -17,7 +17,7 @@
                 {% for message in room_messages %}
                     <div>
                         
-                        <small> <span class="text-primary">@: {{message.user.username}} </span> {{message.date_created|timesince}} ago</small>
+                        <small> <a href="{% url 'profile' message.user.id %}"><span class="text-primary">@: {{message.user.username}}</span></a>  {{message.date_created|timesince}} ago</small>
                         <p>{{message.body}}</p>
                         {% if request.user == message.user %}
                         <small><a type="button" href="{% url 'delete-message' message.id %}"  class="text-danger">Delete</a></small>
@@ -41,7 +41,7 @@
             <hr>
             {% for user in participants%}
                 <div>
-                    <p>@:<a href="#">{{user.username}}</a></p>
+                    <p><a href="{% url 'profile' user.id %}">@:{{user.username}}</a></p>
                 </div>
             {% endfor %}
         </div>

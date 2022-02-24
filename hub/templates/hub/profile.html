@@ -1,0 +1,18 @@
+{% extends 'base.html' %} 
+{% block title %} Profile {% endblock %}
+ {% block content %}
+    <h3 class="text-center">{{user}}</h3>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                {% include 'hub/topics_component.html'%}
+            </div>
+            <div class="col-md-5">
+               {% include 'hub/feed_component.html'%}
+            </div>
+            <div class="col-md-3">
+                {% include 'hub/activity_component.html'%}
+            </div>
+        </div>
+    </div>
+ {% endblock%}

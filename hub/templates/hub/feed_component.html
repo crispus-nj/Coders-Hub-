@@ -1,6 +1,6 @@
 {% for room in rooms %}
 
-<span><strong class="text-primary">@</strong>{{room.host}}</span>
+<a href='{% url 'profile' room.host.id %}'><strong class="text-primary">@</strong>{{room.host}}</a>
 <li><strong>Room Name:</strong><a href='{% url 'rooms' room.id %}'>{{room.name}}</a></li>
 <small><strong>Topic:</strong>{{room.topic}}</small><br>
 {% if request.user.is_authenticated %}
