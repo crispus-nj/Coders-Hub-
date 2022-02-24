@@ -25,20 +25,23 @@ def home(request):
 def room(request, pk):
     room = Room.objects.get(pk=pk)
     room_messages = room.message_set.all().order_by('-date_created')
-
+    participants = room.participants.all()
     if request.method == 'POST':
         message = Message.objects.create(
             user = request.user,
             room = room,
             body = request.POST.get('body')
         )
-        # message.save()
+        room.participants.add(request.user)
         return redirect('rooms', pk=room.id)
 
 
-    context = {'pk':pk, 'room': room,'room_messages':room_messages}
+    context = {'pk':pk, 'room': room,'room_messages':room_messages, 'participants':participants}
     return render(request, 'hub/room.html', context)
-
+    
+@login_required(login_url='login')
+def delete_message(request, pk):
+    return render(request,'hub/delete.html')
 
 @login_required(login_url='login')
 def create_room(request):
