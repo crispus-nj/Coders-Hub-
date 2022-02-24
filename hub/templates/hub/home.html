@@ -20,9 +20,13 @@
             <a href='{% url 'create-room' %}'> Create Room</a>
             <hr>
                {% for room in rooms %}
+                    {% if request.user.is_authenticated %}
+                        {% if request.user == room.host %}
                        <a href='{% url 'update-room' room.id %}' class="btn btn-primary btn-sm">Edit</a>
                        <a href='{% url 'delete-room' room.id %}' class="btn btn-danger btn-sm">Delete</a>
                        <br>
+                         {% endif %}
+                    {% endif %}
                        <span><strong class="text-primary">@</strong>{{room.host}}</span>
                        <li><strong>Room Name:</strong><a href='{% url 'rooms' room.id %}'>{{room.name}}</a></li>
                        <small><strong>Topic:</strong>{{room.topic}}</small>

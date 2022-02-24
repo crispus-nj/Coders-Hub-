@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
+from django.http import HttpResponse
 from django.db.models import Q
 from hub.models import Room, Topic
 from .forms import RoomForm
@@ -24,6 +26,8 @@ def room(request, pk):
     
     return render(request, 'hub/room.html', {'pk':pk, 'room': room})
 
+
+@login_required(login_url='login')
 def create_room(request):
     form = RoomForm()
     if request.method == 'POST':
@@ -33,10 +37,13 @@ def create_room(request):
             return redirect('home')
     return render(request, 'hub/create_room.html', {'form':form})
 
+@login_required(login_url='login')
 def update_room(request, pk):
     room = Room.objects.get(id=pk)
     form = RoomForm(instance=room)
     # print(form)
+    if request.user != room.host:
+        return HttpResponse("You can not edit this room!. Please check your account name and try again!")
     if request.method == 'POST':
         form = RoomForm(request.POST, instance=room)
         if form.is_valid():
@@ -44,9 +51,13 @@ def update_room(request, pk):
             return redirect('home')
     return render(request, 'hub/create_room.html', {'form': form})
 
+@login_required(login_url='login')
 def delete_room(request, pk):
     room = Room.objects.get(id=pk)
     # print(room)
+    if request.user != room.host:
+        return HttpResponse("You can not delete this room! Check your account status and try again!")
+        
     if request.method == 'POST':
         room.delete()
         return redirect('home')

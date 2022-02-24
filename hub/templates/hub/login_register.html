@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %} Create Room {% endblock %}
+
+{% block content %}
+<div>
+    <form action="" method="POST" style="max-width: 550px; margin:auto">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" name="username" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password"  name="password"  class="form-control">
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Login" class="btn btn-primary mt-2">
+        </div>
+    </form>
+</div>
+{% endblock %}
