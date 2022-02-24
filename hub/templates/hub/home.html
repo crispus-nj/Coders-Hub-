@@ -1,0 +1,39 @@
+{% extends 'base.html' %} 
+{% block title %} Homepage {% endblock %}
+ {% block content %}
+ <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3" style="margin-left: 2rem;">
+            <h3>Browse Topics</h3>
+            <hr>
+            <div>
+                <a href="{% url "home" %}">All</a>
+            </div>
+            {% for topic in topics %}
+                <div>
+                    <a href="{% url "home" %}?t={{topic.name}}">{{topic.name}}</a>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="col-md-5">
+            <h5>{{ room_count }} rooms available </h5>
+            <a href='{% url 'create-room' %}'> Create Room</a>
+            <hr>
+               {% for room in rooms %}
+                       <a href='{% url 'update-room' room.id %}' class="btn btn-primary btn-sm">Edit</a>
+                       <a href='{% url 'delete-room' room.id %}' class="btn btn-danger btn-sm">Delete</a>
+                       <br>
+                       <span><strong class="text-primary">@</strong>{{room.host}}</span>
+                       <li><strong>Room Name:</strong><a href='{% url 'rooms' room.id %}'>{{room.name}}</a></li>
+                       <small><strong>Topic:</strong>{{room.topic}}</small>
+                   <hr>
+               {% endfor %}
+        </div>
+        <div class="col-md-4">
+
+        </div>
+    </div>
+ 
+
+</div>
+{% endblock %}
