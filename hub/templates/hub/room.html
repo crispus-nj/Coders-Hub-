@@ -1,7 +1,42 @@
 {% extends 'base.html' %} 
 {% block title %} Rooms {% endblock %}
  {% block content %}
-<p>
-    {{pk}}--{{room.name}}
-</p>
+
+ <div class="container">
+    <div class="row">
+        <div class="col-md-7">
+            <p>
+                {{room.name}}
+            </p>
+            <p>
+                {{room.description}}
+            </p>
+            <div class="comment-wrapper">
+                <h3>Conversation</h3>
+                <hr>
+                {% for message in room_messages %}
+                    <div>
+                        <small> <span class="text-primary">@: {{message.user.username}} </span> {{message.date_created|timesince}} ago</small>
+                        <p>{{message.body}}</p>
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+            {% if request.user.is_authenticated %}
+                <div class="comment-section">
+                    <form action="" method="POST" style="max-width: 350px; padding-left: 20px">
+                        {% csrf_token %}
+                        <input type="text" name="body" id="body" placeholder="Write your message..." class="form-control">
+                    </form>
+                </div>
+                {% endif %}
+        </div>
+        <div class="col-md-3">
+            <h3 style="text-align: center;">Participants</h3>
+            <hr>
+        </div>
+    </div>
+</div>
+
+
  {% endblock %}

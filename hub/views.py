@@ -2,10 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout, authenticate
 from django.http import HttpResponse
 from django.db.models import Q
-from hub.models import Room, Topic
+from hub.models import Room, Topic, Message
 from .forms import RoomForm
 
 
@@ -23,8 +24,20 @@ def home(request):
 
 def room(request, pk):
     room = Room.objects.get(pk=pk)
-    
-    return render(request, 'hub/room.html', {'pk':pk, 'room': room})
+    room_messages = room.message_set.all().order_by('-date_created')
+
+    if request.method == 'POST':
+        message = Message.objects.create(
+            user = request.user,
+            room = room,
+            body = request.POST.get('body')
+        )
+        # message.save()
+        return redirect('rooms', pk=room.id)
+
+
+    context = {'pk':pk, 'room': room,'room_messages':room_messages}
+    return render(request, 'hub/room.html', context)
 
 
 @login_required(login_url='login')
@@ -57,7 +70,7 @@ def delete_room(request, pk):
     # print(room)
     if request.user != room.host:
         return HttpResponse("You can not delete this room! Check your account status and try again!")
-        
+
     if request.method == 'POST':
         room.delete()
         return redirect('home')
@@ -65,8 +78,12 @@ def delete_room(request, pk):
     return render(request, 'hub/delete.html', {'object': room})
 
 def login_page(request):
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
-        username = request.POST.get('username')
+        username = request.POST.get('username').lower()
         password = request.POST.get('password')
         try:
             user = User.objects.filter(username=username)
@@ -78,7 +95,28 @@ def login_page(request):
             return redirect('home')
         else: 
             messages.error(request, 'Username Or Password is incorrect!')
-    context = {}
+    context = { 'page':page} 
+    return render(request, 'hub/login_register.html', context)
+
+def register_page(request):
+    page = 'register'
+    form = UserCreationForm()
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            print("user majina", user.username)
+            user.username = user.username.lower()
+            user.save()
+            login(request, user)
+            return redirect('home')
+        else: 
+            messages.error(request, 'An error Occured!')
+
+    context = {'page': page, 'form': form}
     return render(request, 'hub/login_register.html', context)
 
 def log_out(request):

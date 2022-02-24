@@ -2,6 +2,7 @@
 {% block title %} Homepage {% endblock %}
  {% block content %}
  <div class="container-fluid">
+     <p><strong class="text-warning">@: </strong>{{request.user.username}}</p>
     <div class="row">
         <div class="col-md-3" style="margin-left: 2rem;">
             <h3>Browse Topics</h3>
