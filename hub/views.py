@@ -1,3 +1,4 @@
+from unicodedata import name
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -7,7 +8,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.http import HttpResponse
 from django.db.models import Q
 from hub.models import Room, Topic, Message
-from .forms import RoomForm
+from .forms import RoomForm, UserForm
 
 
 def home(request):
@@ -17,10 +18,11 @@ def home(request):
                                  Q(name__icontains=q) |
                                  Q(description__icontains = q)
                                  )
-    topics = Topic.objects.all()
+    topics = Topic.objects.all()[0:5]
     room_count = rooms.count()
+    topic_count = topics.count()
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-date_created')
-    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count, 'room_messages':room_messages}
+    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count, 'room_messages':room_messages, 'topic_count':topic_count}
     return render(request, 'hub/home.html', context)
 
 def room(request, pk):
@@ -44,7 +46,7 @@ def room(request, pk):
 @login_required(login_url='login')
 def delete_message(request, pk):
     message = Message.objects.get(pk=pk)
-    print("this is message", message)
+    # print("this is a message", message)
     if request.user != message.user:
         return HttpResponse('You can not delete that message! Check your account and try again')
     if request.method == 'POST':
@@ -55,26 +57,47 @@ def delete_message(request, pk):
 @login_required(login_url='login')
 def create_room(request):
     form = RoomForm()
+    topics = Topic.objects.all()
     if request.method == 'POST':
-        form = RoomForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    return render(request, 'hub/create_room.html', {'form':form})
+        topic_name = request.POST.get('topic')
+        topic , created = Topic.objects.get_or_create(name=topic_name)
+        Room.objects.create(
+            host = request.user,
+            topic = topic,
+            name = request.POST.get('name'),
+            description = request.POST.get('description')
+        )
+        # form = RoomForm(request.POST)
+        # if form.is_valid():
+        #     form = form.save(commit=False)
+        #     form.host = request.user 
+        #     form.save()
+        return redirect('home')
+    context = {'topics':topics, 'form':form}
+    return render(request, 'hub/create_room.html', context)
 
 @login_required(login_url='login')
 def update_room(request, pk):
     room = Room.objects.get(id=pk)
     form = RoomForm(instance=room)
+    topics = Topic.objects.all()
     # print(form)
     if request.user != room.host:
         return HttpResponse("You can not edit this room!. Please check your account name and try again!")
     if request.method == 'POST':
-        form = RoomForm(request.POST, instance=room)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    return render(request, 'hub/create_room.html', {'form': form})
+        topic_name = request.POST.get('topic')
+        topic , created = Topic.objects.get_or_create(name=topic_name)
+        room.topic = topic
+        room.name = request.POST.get('name')
+        room.description = request.POST.get('description')
+        room.save()
+
+        # form = RoomForm(request.POST, instance=room)
+        # if form.is_valid():
+        #     form.save()
+        return redirect('home')
+    context = {'topics':topics,'form':form, 'room':room}
+    return render(request, 'hub/create_room.html', context)
 
 @login_required(login_url='login')
 def delete_room(request, pk):
@@ -120,7 +143,7 @@ def register_page(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            print("user majina", user.username)
+            # print("user majina", user.username)
             user.username = user.username.lower()
             user.save()
             login(request, user)
@@ -141,5 +164,28 @@ def user_profile(request, pk):
     rooms = user.room_set.all()
     room_messages = user.message_set.all()
     topics = Topic.objects.all()
-    context = {'user':user, 'rooms': rooms, 'room_messages': room_messages, 'topics': topics}
+    topic_count = topics.count()
+    context = {'user':user, 'rooms': rooms, 'room_messages': room_messages, 'topics': topics, 'topic_count':topic_count}
     return render(request, 'hub/profile.html', context)
+
+@login_required(login_url='login')
+def update_user(request):
+    user = request.user
+    form = UserForm(instance=user)
+    
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile', pk=user.id)
+
+    context = {'form': form}
+    return render(request, 'hub/update_user.html', context)
+
+def topics(request):
+    t = request.GET.get('t') if request.GET.get('t') != None else ''
+    topics = Topic.objects.filter(name__icontains = t)
+    # for topic in topics:
+    #     print(type(topic))
+    context = {'topics': topics}
+    return render(request, 'hub/topics.html', context)
