@@ -1,4 +1,3 @@
-from unicodedata import name
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -189,3 +188,8 @@ def topics(request):
     #     print(type(topic))
     context = {'topics': topics}
     return render(request, 'hub/topics.html', context)
+
+def activity(request):
+    room_messages = Message.objects.all()
+    context = {'room_messages':room_messages}
+    return render(request, 'hub/activity.html', context)
