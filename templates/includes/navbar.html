@@ -22,7 +22,7 @@
         {% if user.is_authenticated %}
         <a href="{% url 'update-profile'%}">
           <div class="avatar avatar--medium active">
-            <img src="https://randomuser.me/api/portraits/men/37.jpg" />
+            <img src="{{request.user.avatar.url}}" />
           </div>
           <p>{{request.user}} <span>@{{request.user.username}}</span></p>
         </a>
